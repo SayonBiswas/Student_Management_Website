@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Report Card System</title>
+    <link rel="stylesheet" href="/static/css/style.css"/>
+</head>
+<body>
+
+{% if user %}
+<nav class="navbar">
+    <div class="nav-brand">📋 Report Card System</div>
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/analytics">Analytics</a>
+        <a href="/feedback">Feedback</a>
+        <span class="nav-user">👤 {{ user.username }} ({{ user.role }})</span>
+        <a href="/logout" class="btn-logout">Logout</a>
+    </div>
+</nav>
+{% endif %}
+
+<div class="main-content">
+    {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

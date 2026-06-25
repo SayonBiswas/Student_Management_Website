@@ -6,7 +6,7 @@ sqlalchemy
 python-jose
 passlib[bcrypt]
 python-dotenv
-jinja2
+jinja2==3.14
 aiofiles
 scikit-learn
 pandas
@@ -16,3 +16,4 @@ textblob
 python-multipart
 pydantic-settings
 pydantic[email]
+slowapi

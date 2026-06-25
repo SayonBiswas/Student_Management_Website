@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+    <h2>Student Dashboard</h2>
+    {% if user.role in ("admin", "teacher") %}
+    <a href="/students/add" class="btn btn-primary">+ Add Student</a>
+    {% endif %}
+</div>
+
+{% if students %}
+<div class="table-wrapper">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Admission No.</th>
+                <th>Name</th>
+                <th>Roll No.</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>Total Marks</th>
+                <th>Average</th>
+                <th>Percentage</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in students %}
+            <tr>
+                <td>{{ s.admission_number }}</td>
+                <td>{{ s.name }}</td>
+                <td>{{ s.roll_number }}</td>
+                <td>{{ s.class_name }}</td>
+                <td>{{ s.section }}</td>
+                <td>{{ s.total_marks }}</td>
+                <td>{{ s.average_marks }}</td>
+                <td>
+                    <span class="badge
+                        {% if s.percentage >= 75 %}badge-green
+                        {% elif s.percentage >= 50 %}badge-yellow
+                        {% else %}badge-red{% endif %}">
+                        {{ s.percentage }}%
+                    </span>
+                </td>
+                <td>
+                    <a href="/students/{{ s.admission_number }}" class="btn btn-sm">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <p>No students found. <a href="/students/add">Add your first student.</a></p>
+</div>
+{% endif %}
+
+{% endblock %}
