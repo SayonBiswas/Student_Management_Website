@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+    <h2>Analytics Dashboard</h2>
+</div>
+
+<!-- Class Summary Table -->
+{% if summary %}
+<div class="form-card">
+    <h4>Class-wise Performance Summary</h4>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Class</th>
+                    <th>Section</th>
+                    <th>Total Students</th>
+                    <th>Avg Percentage</th>
+                    <th>Highest</th>
+                    <th>Lowest</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in summary %}
+                <tr>
+                    <td>{{ row.class_name }}</td>
+                    <td>{{ row.section }}</td>
+                    <td>{{ row.total_students }}</td>
+                    <td>
+                        <span class="badge
+                            {% if row.avg_percentage >= 75 %}badge-green
+                            {% elif row.avg_percentage >= 50 %}badge-yellow
+                            {% else %}badge-red{% endif %}">
+                            {{ row.avg_percentage }}%
+                        </span>
+                    </td>
+                    <td><span class="badge badge-green">{{ row.highest }}%</span></td>
+                    <td><span class="badge badge-red">{{ row.lowest }}%</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    <p>No data available yet. Add students and marks first.</p>
+</div>
+{% endif %}
+
+<!-- ML Predictions Table -->
+{% if predictions %}
+<div class="form-card" style="margin-top: 24px;">
+    <h4>ML Predictions & Recommendations</h4>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Admission No.</th>
+                    <th>Name</th>
+                    <th>Current %</th>
+                    <th>Predicted %</th>
+                    <th>Recommendation</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in predictions %}
+                <tr>
+                    <td>{{ p.admission_number }}</td>
+                    <td>{{ p.name }}</td>
+                    <td>
+                        <span class="badge
+                            {% if p.current_percentage >= 75 %}badge-green
+                            {% elif p.current_percentage >= 50 %}badge-yellow
+                            {% else %}badge-red{% endif %}">
+                            {{ p.current_percentage }}%
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge badge-green">{{ p.predicted_percentage }}%</span>
+                    </td>
+                    <td style="font-size: 0.85rem; color: #555;">{{ p.recommendation }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

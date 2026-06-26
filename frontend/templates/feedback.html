@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+    <h2>Feedback</h2>
+</div>
+
+<!-- Submit Feedback Form -->
+<div class="form-card">
+    <h4>Submit Feedback</h4>
+
+    {% if not students %}
+    <div class="alert alert-error">No students found. Add students first.</div>
+    {% else %}
+    <form method="POST" action="/feedback">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Student</label>
+                <select name="admission_number" required>
+                    <option value="">-- Select Student --</option>
+                    {% for s in students %}
+                    <option value="{{ s.admission_number }}">{{ s.name }} ({{ s.admission_number }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Subject (optional)</label>
+                <input type="text" name="subject_name" placeholder="e.g. Mathematics"/>
+            </div>
+            <div class="form-group">
+                <label>Role</label>
+                <select name="role">
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Feedback</label>
+            <textarea name="feedback_text" rows="4"
+                placeholder="Write your feedback here..." required
+                style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:0.95rem;">
+            </textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Feedback</button>
+    </form>
+    {% endif %}
+</div>
+
+<!-- Feedback List -->
+{% if feedbacks %}
+<div class="form-card" style="margin-top: 24px;">
+    <h4>All Feedback</h4>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Subject</th>
+                    <th>Role</th>
+                    <th>Feedback</th>
+                    <th>Sentiment</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in feedbacks %}
+                <tr>
+                    <td>{{ f.student_name or "N/A" }}</td>
+                    <td>{{ f.subject_name or "General" }}</td>
+                    <td>
+                        <span class="badge
+                            {% if f.role == 'teacher' %}badge-green
+                            {% else %}badge-yellow{% endif %}">
+                            {{ f.role }}
+                        </span>
+                    </td>
+                    <td style="max-width: 280px; font-size: 0.85rem;">{{ f.feedback_text }}</td>
+                    <td>
+                        {% if f.sentiment_score %}
+                            <span class="badge
+                                {% if f.sentiment_score > 0.2 %}badge-green
+                                {% elif f.sentiment_score < -0.2 %}badge-red
+                                {% else %}badge-yellow{% endif %}">
+                                {{ f.sentiment_score }}
+                            </span>
+                        {% else %}
+                            <span class="badge badge-yellow">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge
+                            {% if f.category == 'praise' %}badge-green
+                            {% elif f.category == 'concern' %}badge-red
+                            {% else %}badge-yellow{% endif %}">
+                            {{ f.category or "N/A" }}
+                        </span>
+                    </td>
+                    <td style="font-size: 0.82rem; color: #888;">
+                        {{ f.created_at.strftime('%d %b %Y') if f.created_at else "N/A" }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="empty-state" style="margin-top: 24px;">
+    <p>No feedback submitted yet.</p>
+</div>
+{% endif %}
+
+{% endblock %}
