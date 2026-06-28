@@ -10,7 +10,7 @@ from backend.security.jwt_handler import decode_token
 
 limiter = Limiter(key_func=get_remote_address)
 router = APIRouter()
-templates = Jinja2Templates(directory="fontend/templates")
+templates = Jinja2Templates(directory="frontend/templates")
 
 def get_user(request: Request):
     token = request.cookies.get("access_token")

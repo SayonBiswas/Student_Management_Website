@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Request, Form
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+from jinja2 import Environment, FileSystemLoader
+from weasyprint import HTML
+import tempfile
+import os
 
 from backend.database import database
 from backend.security.jwt_handler import decode_token
@@ -165,3 +169,44 @@ async def update_student(
                 "s": section, "a": admission_number}
     )
     return RedirectResponse(url=f"/students/{admission_number}", status_code=302)
+
+@router.get("/students/{admission_number}/download")
+async def download_marksheet(request: Request, admission_number: int):
+    user = get_user(request)
+    if not user:
+        return RedirectResponse(url="/login", status_code=302)
+
+    student = await database.fetch_one(
+        "SELECT * FROM student_results WHERE admission_number = :a",
+        values={"a": admission_number}
+    )
+    if not student:
+        return RedirectResponse(url="/dashboard", status_code=302)
+
+    marks = await database.fetch_all(
+        """SELECT ss.marks_obtained, ss.max_marks, sub.subject_name,
+           ROUND((ss.marks_obtained::NUMERIC / ss.max_marks::NUMERIC) * 100, 2) AS subject_percentage
+           FROM student_subjects ss
+           JOIN subjects sub ON ss.subject_id = sub.id
+           WHERE ss.admission_number = :a
+           ORDER BY sub.subject_name""",
+        values={"a": admission_number}
+    )
+
+    # convert to plain dicts so Jinja2 can read them
+    student_dict = dict(student)
+    marks_list = [dict(m) for m in marks]
+
+    env = Environment(loader=FileSystemLoader("frontend/templates"))
+    template = env.get_template("marksheet_pdf.html")
+    html_content = template.render(student=student_dict, marks=marks_list)
+
+    pdf = HTML(string=html_content).write_pdf()
+
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"inline; filename=marksheet_{admission_number}.pdf"
+        }
+    )

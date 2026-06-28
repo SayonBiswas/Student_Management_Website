@@ -84,7 +84,14 @@
                 <td>{{ m.subject_name }}</td>
                 <td>{{ m.marks_obtained }}</td>
                 <td>{{ m.max_marks }}</td>
-                <td>{{ m.subject_percentage }}%</td>
+                <td>
+                    <span class="badge
+                        {% if m.subject_percentage >= 75 %}badge-green
+                        {% elif m.subject_percentage >= 50 %}badge-yellow
+                        {% else %}badge-red{% endif %}">
+                        {{ m.subject_percentage }}%
+                    </span>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -117,9 +124,10 @@
 {% else %}
 <div class="page-header">
     <h2>{{ student.name }}</h2>
-    <div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
         <a href="/dashboard" class="btn btn-secondary">← Back</a>
         <a href="/students/{{ student.admission_number }}/marks" class="btn btn-primary">+ Add Marks</a>
+        <a href="/students/{{ student.admission_number }}/download" class="btn btn-success">⬇ Download PDF</a>
     </div>
 </div>
 
@@ -127,7 +135,7 @@
     <span>Admission No: <strong>{{ student.admission_number }}</strong></span>
     <span>Roll No: <strong>{{ student.roll_number }}</strong></span>
     <span>Class: <strong>{{ student.class_name }} - {{ student.section }}</strong></span>
-    <span>Subjects: <strong>{{ student.number_of_subjects }}</strong></span>
+    <span>Total Subjects: <strong>{{ student.number_of_subjects }}</strong></span>
 </div>
 
 <!-- Result Summary -->
@@ -147,6 +155,14 @@
             {% elif student.percentage >= 50 %}text-yellow
             {% else %}text-red{% endif %}">
             {{ student.percentage }}%
+        </span>
+    </div>
+    <div class="result-card">
+        <span class="result-label">Result</span>
+        <span class="result-value
+            {% if student.percentage >= 40 %}text-green
+            {% else %}text-red{% endif %}">
+            {% if student.percentage >= 40 %}PASS{% else %}FAIL{% endif %}
         </span>
     </div>
 </div>
@@ -232,9 +248,12 @@
 {% if user.role == "admin" %}
 <div class="danger-zone">
     <h4>Danger Zone</h4>
+    <p style="font-size: 0.88rem; color: #888; margin-bottom: 12px;">
+        Deleting this student will permanently remove all their marks and data.
+    </p>
     <form method="POST" action="/students/{{ student.admission_number }}/delete">
         <button type="submit" class="btn btn-danger"
-            onclick="return confirm('Are you sure you want to delete this student?')">
+            onclick="return confirm('Are you sure? This cannot be undone.')">
             Delete Student
         </button>
     </form>
