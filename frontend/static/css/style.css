@@ -363,3 +363,34 @@ body {
     .analytics-summary { flex-direction: column; }
     .page-header { flex-direction: column; gap: 12px; align-items: flex-start; }
 }
+
+/* ── LOST AND FOUND ── */
+.lost-found-card {
+    background: white;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    border-left: 4px solid #e74c3c;
+}
+.lost-found-card.found {
+    border-left-color: #27ae60;
+}
+.lost-found-card-title {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 6px;
+}
+.lost-found-card-desc {
+    font-size: 0.85rem;
+    color: #777;
+    margin-bottom: 10px;
+}
+.lost-found-meta {
+    font-size: 0.8rem;
+    color: #aaa;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}

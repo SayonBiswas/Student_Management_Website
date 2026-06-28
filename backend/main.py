@@ -8,6 +8,7 @@ from slowapi.errors import RateLimitExceeded
 
 from backend.database import connect_db, disconnect_db
 from backend.routers import auth, students, marks, feedback, analytics
+from backend.routers import lost_found
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -29,6 +30,7 @@ app.include_router(students.router)
 app.include_router(marks.router)
 app.include_router(feedback.router)
 app.include_router(analytics.router)
+app.include_router(lost_found.router)
 
 @app.get("/")
 async def root():

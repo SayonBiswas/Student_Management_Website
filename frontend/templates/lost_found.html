@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+    <h2>Lost & Found</h2>
+</div>
+
+<!-- Report Item Form -->
+<div class="form-card">
+    <h4>Report an Item</h4>
+    <form method="POST" action="/lost-found">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Item Name</label>
+                <input type="text" name="item_name" placeholder="e.g. Black Wallet" required/>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status" required>
+                    <option value="lost">Lost</option>
+                    <option value="found">Found</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Description (optional)</label>
+            <textarea name="description" rows="3"
+                placeholder="Describe the item, where it was lost/found...">
+            </textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Report</button>
+    </form>
+</div>
+
+<!-- Items List -->
+{% if items %}
+<div class="form-card" style="margin-top: 24px;">
+    <h4>All Reports</h4>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Reported By</th>
+                    <th>Date</th>
+                    {% if user.role in ("admin", "teacher") %}
+                    <th>Actions</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td><strong>{{ item.item_name }}</strong></td>
+                    <td style="font-size: 0.85rem; color: #555; max-width: 250px;">
+                        {{ item.description or "No description provided." }}
+                    </td>
+                    <td>
+                        <span class="badge
+                            {% if item.status == 'found' %}badge-green
+                            {% else %}badge-red{% endif %}">
+                            {{ item.status | upper }}
+                        </span>
+                    </td>
+                    <td>{{ item.reported_by_name or "Unknown" }}</td>
+                    <td style="font-size: 0.82rem; color: #888;">
+                        {{ item.created_at.strftime('%d %b %Y') if item.created_at else "N/A" }}
+                    </td>
+                    {% if user.role in ("admin", "teacher") %}
+                    <td>
+                        <div style="display: flex; gap: 6px;">
+                            {% if item.status == "lost" %}
+                            <form method="POST" action="/lost-found/{{ item.id }}/resolve">
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    Mark Found
+                                </button>
+                            </form>
+                            {% endif %}
+                            {% if user.role == "admin" %}
+                            <form method="POST" action="/lost-found/{{ item.id }}/delete">
+                                <button type="submit" class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Delete this report?')">
+                                    Delete
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="empty-state" style="margin-top: 24px;">
+    <p>No lost or found items reported yet.</p>
+</div>
+{% endif %}
+
+{% endblock %}
