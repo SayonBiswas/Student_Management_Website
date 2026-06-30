@@ -221,6 +221,16 @@ async def my_report(request: Request):
     if user.get("role") != "student":
         return RedirectResponse(url="/dashboard", status_code=302)
     
+    admission_number = user.get("admission_number")
+    if not admission_number:
+        return templates.TemplateResponse("my_report.html", {
+            "request": request,
+            "student": None,
+            "marks": [],
+            "user": user,
+            "error": "No admission number linked to your account. Contact your teacher."
+        })
+    
     student = await database.fetch_one(
         "SELECT * FROM student_results WHERE admission_number = :a",
         values={"a": int(user.get("admission_number", 0))}
