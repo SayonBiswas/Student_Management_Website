@@ -12,10 +12,16 @@
 <nav class="navbar">
     <div class="nav-brand">📋 Report Card System</div>
     <div class="nav-links">
-        <a href="/dashboard">Dashboard</a>
-        <a href="/analytics">Analytics</a>
-        <a href="/feedback">Feedback</a>
-        <a href="/lost-found">Lost & Found</a>
+        {% if user.role == "student" %}
+            <a href="/my-report">My Report</a>
+            <a href="/feedback">Feedback</a>
+            <a href="/lost-found">Lost & Found</a>
+        {% else %}
+            <a href="/dashboard">Dashboard</a>
+            <a href="/analytics">Analytics</a>
+            <a href="/feedback">Feedback</a>
+            <a href="/lost-found">Lost & Found</a>
+        {% endif %}
         <span class="nav-user">👤 {{ user.username }} ({{ user.role }})</span>
         <a href="/logout" class="btn-logout">Logout</a>
     </div>

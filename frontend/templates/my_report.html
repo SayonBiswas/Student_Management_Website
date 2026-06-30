@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header">
+    <h2>My Report Card</h2>
+    {% if student %}
+    <a href="/students/{{ student.admission_number }}/download" class="btn btn-success">⬇ Download PDF</a>
+    {% endif %}
+</div>
+
+{% if student %}
+<div class="student-info-bar">
+    <span>Name: <strong>{{ student.name }}</strong></span>
+    <span>Admission No: <strong>{{ student.admission_number }}</strong></span>
+    <span>Roll No: <strong>{{ student.roll_number }}</strong></span>
+    <span>Class: <strong>{{ student.class_name }} - {{ student.section }}</strong></span>
+</div>
+
+<div class="result-summary">
+    <div class="result-card">
+        <span class="result-label">Total Marks</span>
+        <span class="result-value">{{ student.total_marks }} / {{ student.total_max_marks }}</span>
+    </div>
+    <div class="result-card">
+        <span class="result-label">Average</span>
+        <span class="result-value">{{ student.average_marks }}</span>
+    </div>
+    <div class="result-card">
+        <span class="result-label">Percentage</span>
+        <span class="result-value
+            {% if student.percentage >= 75 %}text-green
+            {% elif student.percentage >= 50 %}text-yellow
+            {% else %}text-red{% endif %}">
+            {{ student.percentage }}%
+        </span>
+    </div>
+    <div class="result-card">
+        <span class="result-label">Result</span>
+        <span class="result-value
+            {% if student.percentage >= 40 %}text-green
+            {% else %}text-red{% endif %}">
+            {% if student.percentage >= 40 %}PASS{% else %}FAIL{% endif %}
+        </span>
+    </div>
+</div>
+
+{% if marks %}
+<div class="table-wrapper">
+    <h4>Subject-wise Marks</h4>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Marks Obtained</th>
+                <th>Max Marks</th>
+                <th>Percentage</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in marks %}
+            <tr>
+                <td>{{ m.subject_name }}</td>
+                <td>{{ m.marks_obtained }}</td>
+                <td>{{ m.max_marks }}</td>
+                <td>
+                    <span class="badge
+                        {% if m.subject_percentage >= 75 %}badge-green
+                        {% elif m.subject_percentage >= 50 %}badge-yellow
+                        {% else %}badge-red{% endif %}">
+                        {{ m.subject_percentage }}%
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+    <p>No report card found. Contact your teacher to add your marks.</p>
+</div>
+{% endif %}
+
+{% endblock %}

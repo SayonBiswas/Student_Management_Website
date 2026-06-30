@@ -210,3 +210,35 @@ async def download_marksheet(request: Request, admission_number: int):
             "Content-Disposition": f"inline; filename=marksheet_{admission_number}.pdf"
         }
     )
+
+@router.get("/my-report")
+@limiter.limit("20/minute")
+async def my_report(request: Request):
+    user = get_user(request)
+    if not user:
+        return RedirectResponse(url="/login", status_code=302)
+    
+    if user.get("role") != "student":
+        return RedirectResponse(url="/dashboard", status_code=302)
+    
+    student = await database.fetch_one(
+        "SELECT * FROM student_results WHERE admission_number = :a",
+        values={"a": int(user.get("admission_number", 0))}
+    )
+    marks=[]
+    if student:
+        marks = await database.fetch_all(
+            """SELECT ss.marks_obtained, ss.max_marks, sub.subject_name,
+            ROUND((ss.marks_obtained::NUMERIC / ss.max_marks::NUMERIC) * 100, 2) AS subject_percentage
+            FROM student_subjects ss
+            JOIN subjects sub ON ss.subject_id = sub.id
+            WHERE ss.admission_number = :a
+            ORDER BY sub.subject_name""",
+            values={"a": student["admission_number"]}
+        )
+    return templates.TemplateResponse("my_report.html", {
+        "request": request,
+        "student": student,
+        "marks": marks,
+        "user": user
+    })

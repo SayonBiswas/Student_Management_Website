@@ -33,5 +33,14 @@ app.include_router(analytics.router)
 app.include_router(lost_found.router)
 
 @app.get("/")
-async def root():
+async def root(request: Request):
+    token = request.cookies.get("access_token")
+    if token:
+        try:
+            from backend.security.jwt_handler import decode_token
+            payload = decode_token(token)
+            if payload.get("role") == "student":
+                return RedirectResponse(url="/my-report", status_code=302)
+        except:
+            pass
     return RedirectResponse(url="/login", status_code=302)

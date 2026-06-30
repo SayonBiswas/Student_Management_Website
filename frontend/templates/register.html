@@ -25,10 +25,16 @@
             </div>
             <div class="form-group">
                 <label>Role</label>
-                <select name="role">
+                <select name="role" id="roleSelect" onchange="toggleAdmission()">
                     <option value="teacher">Teacher</option>
                     <option value="admin">Admin</option>
+                    <option value="student">Student</option>
                 </select>
+            </div>
+            <div class="form-group" id="admissionField" style="display:none;">
+                <label>Admission Number</label>
+                <input type="number" name="admission_number" placeholder="Enter your admission number"/>
+                <small style="color:#888; font-size:0.8rem;">Required for student registration</small>
             </div>
             <button type="submit" class="btn btn-primary">Register</button>
         </form>
@@ -36,5 +42,13 @@
         <p class="auth-link">Already have an account? <a href="/login">Sign in</a></p>
     </div>
 </div>
+
+<script>
+function toggleAdmission() {
+    const role = document.getElementById("roleSelect").value;
+    const field = document.getElementById("admissionField");
+    field.style.display = role === "student" ? "block" : "none";
+}
+</script>
 
 {% endblock %}

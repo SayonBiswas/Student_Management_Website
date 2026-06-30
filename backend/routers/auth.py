@@ -54,7 +54,8 @@ async def login(
     token = create_access_token({
         "sub": str(user["id"]),
         "username": user["username"],
-        "role": user["role"]
+        "role": user["role"],
+        "admission_number": str(user["admission_number"]) if user["admission_number"] else None
     })
     response = RedirectResponse(url="/dashboard", status_code=302)
     return set_auth_cookie(response, token)
@@ -72,9 +73,10 @@ async def register(
     username: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
-    role: str = Form("teacher")
+    role: str = Form("teacher"),
+    admission_number: str = Form(None)
 ):
-    if role not in ("teacher", "admin"):
+    if role not in ("teacher", "admin", "student"):
         role = "teacher"
 
     existing = await database.fetch_one(
@@ -92,6 +94,33 @@ async def register(
             "request": request,
             "error": "Password must be at least 6 characters."
         })
+    
+    adm_no = None
+    if role == "student":
+        if not admission_number:
+            return templates.TemplateResponse("register.html", {
+                "request": request,
+                "error": "Admission number is required for student registration."
+            })
+        student = await database.fetch_one(
+            "SELECT admission_number FROM students WHERE admission_number = :a",
+            values={"a": int(admission_number)}
+        )
+        if not student:
+            return templates.TemplateResponse("register.html", {
+                "request": request,
+                "error": "Admission number not found. Contact your teacher."
+            })
+        
+        already_linked = await database.fetch_one(
+            "SELECT id FROM users WHERE admission_number = :a",
+            values={"a": int(admission_number)}
+        )
+        if already_linked:
+            return templates.TemplateResponse("register.html", {
+                "request": request,
+                "error": "This admission number is already registered."
+            })
 
     hashed = hash_password(password)
     await database.execute(
