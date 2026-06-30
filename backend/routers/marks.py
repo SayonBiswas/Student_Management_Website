@@ -34,7 +34,9 @@ async def add_marks_page(request: Request, admission_number: int):
         values={"a": admission_number}
     )
     existing_marks = await database.fetch_all(
-        """SELECT ss.*, sub.subject_name FROM student_subjects ss
+        """SELECT ss.marks_obtained, ss.max_marks, sub.subject_name,
+           ROUND((ss.marks_obtained::NUMERIC / ss.max_marks::NUMERIC) * 100, 2) AS subject_percentage
+           FROM student_subjects ss
            JOIN subjects sub ON ss.subject_id = sub.id
            WHERE ss.admission_number = :a""",
         values={"a": admission_number}

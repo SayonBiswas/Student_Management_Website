@@ -23,6 +23,7 @@
             <a href="/lost-found">Lost & Found</a>
         {% endif %}
         <span class="nav-user">👤 {{ user.username }} ({{ user.role }})</span>
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
         <a href="/logout" class="btn-logout">Logout</a>
     </div>
 </nav>
@@ -31,6 +32,30 @@
 <div class="main-content">
     {% block content %}{% endblock %}
 </div>
+
+<script>
+    function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        const btn = document.getElementById("themeBtn");
+        if (btn) {
+            btn.textContent = theme === "dark" ? "☀ Light" : "🌙 Dark";
+        }
+    }
+
+    function toggleTheme() {
+        const current = document.documentElement.getAttribute("data-theme") || "light";
+        const next = current === "dark" ? "light" : "dark";
+        applyTheme(next);
+        document.cookie = "theme=" + next + "; path=/; max-age=31536000";
+    }
+
+    // read theme from cookie on page load
+    (function() {
+        const match = document.cookie.match(/theme=(dark|light)/);
+        const saved = match ? match[1] : "light";
+        applyTheme(saved);
+    })();
+</script>
 
 </body>
 </html>
