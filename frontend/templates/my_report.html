@@ -8,6 +8,10 @@
     {% endif %}
 </div>
 
+{% if error %}
+<div class="alert alert-error">{{ error }}</div>
+{% endif %}
+
 {% if student %}
 <div class="student-info-bar">
     <span>Name: <strong>{{ student.name }}</strong></span>
@@ -16,6 +20,7 @@
     <span>Class: <strong>{{ student.class_name }} - {{ student.section }}</strong></span>
 </div>
 
+<!-- Result Summary -->
 <div class="result-summary">
     <div class="result-card">
         <span class="result-label">Total Marks</span>
@@ -44,6 +49,7 @@
     </div>
 </div>
 
+<!-- Subject wise marks -->
 {% if marks %}
 <div class="table-wrapper">
     <h4>Subject-wise Marks</h4>
@@ -74,6 +80,83 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
+{% endif %}
+
+<!-- My Class Section -->
+{% if classmates %}
+<div class="class-container" style="margin-top: 24px;">
+    <div class="class-header">
+        <span class="class-icon">🏫</span>
+        <h3>Class {{ student.class_name }} — Section {{ student.section }}</h3>
+        <span class="class-badge">{{ classmates|length }} Students</span>
+    </div>
+
+    <div class="sections-wrapper">
+        <div class="section-container">
+            <div class="section-header">
+                <h4>Section {{ student.section }}</h4>
+                <span class="section-count">{{ classmates|length }} students</span>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Roll No.</th>
+                            <th>Name</th>
+                            <th>Percentage</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in classmates %}
+                        <tr {% if c.admission_number == student.admission_number %}
+                            style="background: rgba(52,152,219,0.1);"{% endif %}>
+                            <td>{{ c.roll_number }}</td>
+                            <td>
+                                <strong>{{ c.name }}</strong>
+                                {% if c.admission_number == student.admission_number %}
+                                <span class="badge badge-blue" style="margin-left:6px;">You</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge
+                                    {% if c.percentage >= 75 %}badge-green
+                                    {% elif c.percentage >= 50 %}badge-yellow
+                                    {% else %}badge-red{% endif %}">
+                                    {{ c.percentage }}%
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge
+                                    {% if c.percentage >= 40 %}badge-green
+                                    {% else %}badge-red{% endif %}">
+                                    {% if c.percentage >= 40 %}PASS{% else %}FAIL{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Section summary -->
+            {% set ns = namespace(total_pct=0, pass_count=0) %}
+            {% for c in classmates %}
+                {% set ns.total_pct = ns.total_pct + c.percentage %}
+                {% if c.percentage >= 40 %}
+                    {% set ns.pass_count = ns.pass_count + 1 %}
+                {% endif %}
+            {% endfor %}
+            <div class="section-summary">
+                <span>📊 Section Avg: <strong>{{ (ns.total_pct / classmates|length)|round(2) }}%</strong></span>
+                <span>✅ Pass: <strong>{{ ns.pass_count }}</strong></span>
+                <span>❌ Fail: <strong>{{ classmates|length - ns.pass_count }}</strong></span>
+            </div>
+
+        </div>
+    </div>
 </div>
 {% endif %}
 

@@ -124,9 +124,9 @@ async def register(
 
     hashed = hash_password(password)
     await database.execute(
-        """INSERT INTO users (username, email, hashed_password, role)
-           VALUES (:u, :e, :h, :r)""",
-        values={"u": username, "e": email, "h": hashed, "r": role}
+        """INSERT INTO users (username, email, hashed_password, role, admission_number)
+           VALUES (:u, :e, :h, :r, :a)""",
+        values={"u": username, "e": email, "h": hashed, "r": role, "a": int(admission_number) if admission_number else None}
     )
     return RedirectResponse(url="/login", status_code=302)
 

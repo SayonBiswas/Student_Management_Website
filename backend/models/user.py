@@ -5,6 +5,7 @@ class UserRegister(BaseModel):
     email: EmailStr
     password: str
     role: str = "teacher"
+    admission_number: int = None
 
 class UserLogin(BaseModel):
     username: str

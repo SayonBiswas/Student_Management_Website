@@ -33,12 +33,33 @@ async def dashboard(request: Request):
     if not user:
         return RedirectResponse(url="/login", status_code=302)
 
-    students = await database.fetch_all(
-        "SELECT * FROM student_results ORDER BY class_name, section, roll_number"
+    if user.get("role") == "student":
+        return RedirectResponse(url="/my-report", status_code=302)
+
+    classes = await database.fetch_all(
+        "SELECT DISTINCT class_name FROM students ORDER BY class_name"
     )
+
+    all_students = await database.fetch_all(
+        """SELECT sr.*, s.class_name, s.section
+           FROM student_results sr
+           JOIN students s ON sr.admission_number = s.admission_number
+           ORDER BY s.class_name, s.section, s.roll_number"""
+    )
+
+    class_data = {}
+    for student in all_students:
+        cls = student["class_name"]
+        sec = student["section"]
+        if cls not in class_data:
+            class_data[cls] = {}
+        if sec not in class_data[cls]:
+            class_data[cls][sec] = []
+        class_data[cls][sec].append(dict(student))
+
     return templates.TemplateResponse("dashboard.html", {
         "request": request,
-        "students": students,
+        "class_data": class_data,
         "user": user
     })
 
@@ -170,6 +191,7 @@ async def update_student(
     )
     return RedirectResponse(url=f"/students/{admission_number}", status_code=302)
 
+
 @router.get("/students/{admission_number}/download")
 async def download_marksheet(request: Request, admission_number: int):
     user = get_user(request)
@@ -211,44 +233,62 @@ async def download_marksheet(request: Request, admission_number: int):
         }
     )
 
+
 @router.get("/my-report")
 @limiter.limit("20/minute")
 async def my_report(request: Request):
     user = get_user(request)
     if not user:
         return RedirectResponse(url="/login", status_code=302)
-    
+
     if user.get("role") != "student":
         return RedirectResponse(url="/dashboard", status_code=302)
-    
+
     admission_number = user.get("admission_number")
     if not admission_number:
         return templates.TemplateResponse("my_report.html", {
             "request": request,
             "student": None,
             "marks": [],
+            "classmates": [],
             "user": user,
-            "error": "No admission number linked to your account. Contact your teacher."
+            "error": "No admission number linked. Contact your teacher."
         })
-    
+
     student = await database.fetch_one(
         "SELECT * FROM student_results WHERE admission_number = :a",
-        values={"a": int(user.get("admission_number", 0))}
+        values={"a": int(admission_number)}
     )
-    marks=[]
+
+    marks = []
+    classmates = []
+
     if student:
         marks = await database.fetch_all(
             """SELECT ss.marks_obtained, ss.max_marks, sub.subject_name,
-            ROUND((ss.marks_obtained::NUMERIC / ss.max_marks::NUMERIC) * 100, 2) AS subject_percentage
-            FROM student_subjects ss
-            JOIN subjects sub ON ss.subject_id = sub.id
-            WHERE ss.admission_number = :a
-            ORDER BY sub.subject_name""",
+               ROUND((ss.marks_obtained::NUMERIC / ss.max_marks::NUMERIC) * 100, 2) AS subject_percentage
+               FROM student_subjects ss
+               JOIN subjects sub ON ss.subject_id = sub.id
+               WHERE ss.admission_number = :a
+               ORDER BY sub.subject_name""",
             values={"a": student["admission_number"]}
         )
+
+        # fetch only students from same class and section
+        classmates = await database.fetch_all(
+            """SELECT sr.admission_number, sr.name, sr.roll_number,
+               sr.percentage, s.class_name, s.section
+               FROM student_results sr
+               JOIN students s ON sr.admission_number = s.admission_number
+               WHERE s.class_name = :c AND s.section = :sec
+               ORDER BY s.roll_number""",
+            values={"c": student["class_name"], "sec": student["section"]}
+        )
+
     return templates.TemplateResponse("my_report.html", {
         "request": request,
         "student": student,
         "marks": marks,
+        "classmates": classmates,
         "user": user
     })

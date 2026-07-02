@@ -8,48 +8,100 @@
     {% endif %}
 </div>
 
-{% if students %}
-<div class="table-wrapper">
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>Admission No.</th>
-                <th>Name</th>
-                <th>Roll No.</th>
-                <th>Class</th>
-                <th>Section</th>
-                <th>Total Marks</th>
-                <th>Average</th>
-                <th>Percentage</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for s in students %}
-            <tr>
-                <td>{{ s.admission_number }}</td>
-                <td>{{ s.name }}</td>
-                <td>{{ s.roll_number }}</td>
-                <td>{{ s.class_name }}</td>
-                <td>{{ s.section }}</td>
-                <td>{{ s.total_marks }}</td>
-                <td>{{ s.average_marks }}</td>
-                <td>
-                    <span class="badge
-                        {% if s.percentage >= 75 %}badge-green
-                        {% elif s.percentage >= 50 %}badge-yellow
-                        {% else %}badge-red{% endif %}">
-                        {{ s.percentage }}%
-                    </span>
-                </td>
-                <td>
-                    <a href="/students/{{ s.admission_number }}" class="btn btn-sm">View</a>
-                </td>
-            </tr>
+{% if class_data %}
+    {% for class_name, sections in class_data.items() %}
+
+    <!-- CLASS CONTAINER -->
+    <div class="class-container">
+        <div class="class-header">
+            <span class="class-icon">🏫</span>
+            <h3>Class {{ class_name }}</h3>
+            <span class="class-badge">
+                {% set total = namespace(count=0) %}
+                {% for sec, students in sections.items() %}
+                    {% set total.count = total.count + students|length %}
+                {% endfor %}
+                {{ total.count }} Students
+            </span>
+        </div>
+
+        <div class="sections-wrapper">
+            {% for section, students in sections.items() %}
+
+            <!-- SECTION CONTAINER -->
+            <div class="section-container">
+                <div class="section-header">
+                    <h4>Section {{ section }}</h4>
+                    <span class="section-count">{{ students|length }} students</span>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Adm. No.</th>
+                                <th>Name</th>
+                                <th>Roll No.</th>
+                                <th>Total</th>
+                                <th>Avg</th>
+                                <th>Percentage</th>
+                                <th>Result</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in students %}
+                            <tr>
+                                <td>{{ s.admission_number }}</td>
+                                <td><strong>{{ s.name }}</strong></td>
+                                <td>{{ s.roll_number }}</td>
+                                <td>{{ s.total_marks }} / {{ s.total_max_marks }}</td>
+                                <td>{{ s.average_marks }}</td>
+                                <td>
+                                    <span class="badge
+                                        {% if s.percentage >= 75 %}badge-green
+                                        {% elif s.percentage >= 50 %}badge-yellow
+                                        {% else %}badge-red{% endif %}">
+                                        {{ s.percentage }}%
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge
+                                        {% if s.percentage >= 40 %}badge-green
+                                        {% else %}badge-red{% endif %}">
+                                        {% if s.percentage >= 40 %}PASS{% else %}FAIL{% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/students/{{ s.admission_number }}" class="btn btn-sm btn-primary">View</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Section Summary Bar -->
+                <div class="section-summary">
+                    {% set ns = namespace(total_pct=0, pass_count=0) %}
+                    {% for s in students %}
+                        {% set ns.total_pct = ns.total_pct + s.percentage %}
+                        {% if s.percentage >= 40 %}
+                            {% set ns.pass_count = ns.pass_count + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    <span>📊 Avg: <strong>{{ (ns.total_pct / students|length)|round(2) }}%</strong></span>
+                    <span>✅ Pass: <strong>{{ ns.pass_count }}</strong></span>
+                    <span>❌ Fail: <strong>{{ students|length - ns.pass_count }}</strong></span>
+                </div>
+
+            </div>
             {% endfor %}
-        </tbody>
-    </table>
-</div>
+        </div>
+    </div>
+
+    {% endfor %}
+
 {% else %}
 <div class="empty-state">
     <p>No students found. <a href="/students/add">Add your first student.</a></p>
