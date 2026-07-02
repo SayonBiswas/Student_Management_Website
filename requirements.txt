@@ -1,4 +1,4 @@
-fastapi
+fastapi==0.111.0
 uvicorn
 asyncpg
 databases[asyncpg]
@@ -18,3 +18,4 @@ pydantic-settings
 pydantic[email]
 slowapi
 weasyprint
+starlette==0.37.2
