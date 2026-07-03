@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Report Card System</title>
+    <title>Student Management System</title>
     <link rel="stylesheet" href="/static/css/style.css"/>
 </head>
 <body>
 
 {% if user %}
 <nav class="navbar">
-    <div class="nav-brand">📋 Report Card System</div>
+    <div class="nav-brand">📋 Student Management System</div>
     <div class="nav-links">
         {% if user.role == "student" %}
             <a href="/my-report">My Report</a>

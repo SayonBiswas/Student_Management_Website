@@ -1,6 +1,6 @@
-# 📋 Report Card Management System
+# 📋 Student Management System
 
-A full-featured student report card management system built with **FastAPI**, **PostgreSQL**, and **Jinja2** templates. Designed for schools and educational institutions to manage student records, marks, feedback, analytics, and lost & found reports.
+A full-featured student management system built with **FastAPI**, **PostgreSQL**, and **Jinja2** templates. Designed for schools and educational institutions to manage student records, marks, feedback, analytics, and lost & found reports.
 
 ---
 

@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
     yield
     await disconnect_db()
 
-app = FastAPI(title="Report Card System", lifespan=lifespan)
+app = FastAPI(title="Student Management System", lifespan=lifespan)
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
