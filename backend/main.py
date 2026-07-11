@@ -32,7 +32,7 @@ app.include_router(feedback.router)
 app.include_router(analytics.router)
 app.include_router(lost_found.router)
 
-@app.get("/")
+@app.get("/", methods=["GET", "HEAD"])
 async def root(request: Request):
     token = request.cookies.get("access_token")
     if token:
