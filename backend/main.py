@@ -32,7 +32,7 @@ app.include_router(feedback.router)
 app.include_router(analytics.router)
 app.include_router(lost_found.router)
 
-@app.get("/", methods=["GET", "HEAD"])
+@app.get("/")
 async def root(request: Request):
     token = request.cookies.get("access_token")
     if token:
@@ -44,3 +44,8 @@ async def root(request: Request):
         except:
             pass
     return RedirectResponse(url="/login", status_code=302)
+
+
+@app.api_route("/health", methods=["GET", "HEAD"])
+async def health_check():
+    return {"status": "ok"}
