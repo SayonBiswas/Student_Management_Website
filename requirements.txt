@@ -3,7 +3,7 @@ uvicorn
 asyncpg
 databases[asyncpg]
 sqlalchemy
-python-jose
+python-jose[cryptography]
 bcrypt
 python-dotenv
 jinja2==3.1.4
